@@ -14,6 +14,9 @@ class Player:
     def draw_cards(self, cards):
         self.hand.append(cards)
 
+    def draw_route(self, route):
+        self.routes.append(route)
+
     def build_connection(self, wagons_needed, points):
         self.wagons -= wagons_needed
         self.score += points
