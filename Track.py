@@ -7,40 +7,42 @@ Original file is located at
     https://colab.research.google.com/drive/1XfEPOjOrVfSgGboWGA2GvqFKZAd_nuX0
 """
 
+
 class Track:
-    def __init__(self, station1, station2, length, track_type, points, state = 0):
+    def __init__(self, name, station1, station2, length, points, track_type, state=0):
+        self.name = name
         self.station1 = station1
         self.station2 = station2
         self.length = length
-        self.track_type = track_type
         self.points = points
+        self.track_type = track_type
         self.state = state
 
     def __str__(self):
-        return f"Connection between {self.station1} and {self.station2}, length: {self.length}, type: {self.track_type}, points: {self.points}, track status: {self.state}"
+        return f"Connection with name {self.name} between {self.station1} and {self.station2}, length: {self.length}, type: {self.track_type}, points: {self.points}, track status: {self.state}"
 
-    def change_lemgth(self, new_length):
+    def change_length(self, new_length):
         self.length = new_length
 
     def change_type(self, new_type):
         self.track_type = new_type
 
     def change_points(self, new_points):
-       self.points = new_points
+        self.points = new_points
     
     def change_state(self, new_state):
         self.state = new_state
 
-track_12b = Track(1,2,5,10,'b')
-track_23r = Track(2,3,1,1,'r')
-track_34b = Track(3,4,2,2,'b')
-track_45r = Track(4,5,4,5,'r')
-track_35r = Track(3,5,3,3,'r')
-track_35b = Track(3,5,3,3,'b')
-track_15r = Track(1,5,2,2,'r')
-
-str(track_12b)
-
-track_12b.change_state(1)
-
-str(track_12b)
+# track_12b = Track(1,2,5,10,'b')
+# track_23r = Track(2,3,1,1,'r')
+# track_34b = Track(3,4,2,2,'b')
+# track_45r = Track(4,5,4,5,'r')
+# track_35r = Track(3,5,3,3,'r')
+# track_35b = Track(3,5,3,3,'b')
+# track_15r = Track(1,5,2,2,'r')
+#
+# print(str(track_12b))
+#
+# track_12b.change_state(1)
+#
+# print(str(track_12b))
