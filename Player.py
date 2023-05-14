@@ -30,3 +30,4 @@ class Player:
         self.score += track.points
         for i in range(track.length):
             self.hand.remove(track.track_type)
+        self.connections.append([track.station1, track.station2])
