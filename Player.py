@@ -3,9 +3,14 @@ class Player:
         self.name = name
         self.hand = []
         self.routes = []
+        self.completed_routes = []
         self.connections = []
         self.wagons = 6
         self.score = 0
+
+    def complete_route(self, route):
+        self.routes.remove(route)
+        self.completed_routes.append(route)
 
     def decision_getter(self, decision_range):
         decision = None

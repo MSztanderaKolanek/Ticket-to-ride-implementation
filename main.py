@@ -12,6 +12,7 @@ track_45r = Track('track_45r', 4, 5, 4, 5, 'red')
 track_35r = Track('track_35r', 3, 5, 3, 3, 'red')
 track_35b = Track('track_35b', 3, 5, 3, 3, 'blue')
 track_15r = Track('track_15r', 1, 5, 2, 2, 'red')
+
 current_map = [track_12b, track_23r, track_34b, track_45r, track_35r, track_35b, track_15r]
 routes = [("1", "2", 3), ("1", "3", 5), ("1", "4", 10), ("3", "2", 1), ("4", "5", 3), ("3", "5", 2)]
 first_player = Player("Marek")
@@ -19,21 +20,23 @@ second_player = Player("Mirek")
 first_player.draw_route(routes.pop(random.randint(0, len(routes) - 1)))
 second_player.draw_route(routes.pop(random.randint(0, len(routes) - 1)))
 
+
 def check_routes(player):
-    points=0
+    points = 0
     route = list(player.routes[0])
     print(route)
-    start=int(route[0])
-    end=int(route[1])
-    p=route[2]
+    start = int(route[0])
+    end = int(route[1])
+    p = route[2]
 
     mp = nx.Graph()
     for i in player.connections:
-        mp.add_edge(i[0],i[1])
-    if nx.has_path(mp,start,end):
-        points=p
+        mp.add_edge(i[0], i[1])
+    if nx.has_path(mp, start, end):
+        points = p
 
     return points
+
 
 def game(player1, player2, map):
     game_end = False
@@ -71,7 +74,7 @@ def game(player1, player2, map):
         players[0], players[1] = players[1], players[0]
 
     print(player1.score, player2.score)
-    player1.score+=check_routes(player1)
+    player1.score += check_routes(player1)
     player2.score += check_routes(player2)
     print(player1.score, player2.score)
     return 0
