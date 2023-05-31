@@ -5,7 +5,7 @@ class Player:
         self.routes = []
         self.completed_routes = []
         self.connections = []
-        self.wagons = 6
+        self.wagons = 15
         self.score = 0
 
     def complete_route(self, route):

@@ -1,11 +1,44 @@
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import random
+import pickle
+import os
 from Player import Player
 from Track import Track
-import random
-import networkx as nx
 from Agent import Agent
-import numpy as np
-import os
-import pickle
+
+
+def visualize(game_map, connections):
+    mp = nx.Graph()
+    for x in range(13):
+        mp.add_node(x+1)
+    for track in game_map:
+        mp.add_edge(track.station1, track.station2, length=track.length)
+
+    colored_edges = []
+    colored_nodes = []
+    for connection in connections:
+        if connection[0] < connection[1]:
+            colored_edges.append((int(connection[0]), int(connection[1])))
+        else:
+            colored_edges.append((int(connection[1]), int(connection[0])))
+        if int(connection[0]) not in colored_nodes:
+            colored_nodes.append((int(connection[0])))
+        if int(connection[1]) not in colored_nodes:
+            colored_nodes.append((int(connection[1])))
+
+    pos = nx.spring_layout(mp, seed=204, weight='length')
+    node_colors = ['blue' if node in colored_nodes else 'lightblue' for node in mp.nodes()]
+
+    edge_colors = ['blue' if edge in colored_edges else 'gray' for edge in mp.edges()]
+    nx.draw(mp, pos, with_labels=True, node_color=node_colors, node_size=500, font_size=12)
+
+    nx.draw_networkx_edges(mp, pos, edgelist=mp.edges(), edge_color=edge_colors, width=10)
+    edge_labels = nx.get_edge_attributes(mp, 'length')
+    nx.draw_networkx_edge_labels(mp, pos, edge_labels=edge_labels,
+                                 font_color='black', label_pos=0.5, verticalalignment='center')
+    plt.show()
 
 
 def check_routes(player):
@@ -66,7 +99,14 @@ def check_reward(action, player, initialized_map, current_map):
     return reward
 
 
-def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, gamma, gather_data, learning_rate, save):
+def games(episodes, iterations, min_epsilon, epsilon_dec, gamma,
+          gather_data, learning_rate, save, show_best):
+    agent = Agent()
+    empty_player = Player("empty")
+    best_score = 0
+    period_best_score = 0
+    game_map = []
+
     if os.path.isfile("data"):
         with open("data", 'rb') as f:
             gameplay_data = pickle.load(f)
@@ -76,33 +116,53 @@ def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, ga
         with open("model", 'rb') as f:
             weights, episode = pickle.load(f)
     else:
-        weights = np.array([np.random.uniform(-0.1, 0.1) for _ in range(number_of_features)])
-    agent = Agent()
-
-    best_score = 0
-    period_best_score = 0
+        weights = np.array([np.random.uniform(-0.1, 0.1) for _ in range(len(agent.get_feature_vector(empty_player)))])
 
     for episode in range(episodes):
         # Initializing environment, drawing routes
         track_12b = Track('track_12b', 1, 2, 5, 10, 'blue')
         track_23r = Track('track_23r', 2, 3, 1, 1, 'red')
         track_34b = Track('track_34b', 3, 4, 2, 2, 'blue')
-        track_45r = Track('track_45r', 4, 5, 4, 5, 'red')
-        track_35r = Track('track_35r', 3, 5, 3, 3, 'red')
-        track_35b = Track('track_35b', 3, 5, 3, 3, 'blue')
+        track_45r = Track('track_45r', 4, 5, 4, 7, 'red')
+        track_35r = Track('track_35r', 3, 5, 3, 4, 'red')
+        track_35b = Track('track_35b', 3, 5, 3, 4, 'blue')
         track_15r = Track('track_15r', 1, 5, 2, 2, 'red')
-        initialized_map = [track_12b, track_23r, track_34b, track_45r, track_35r, track_35b, track_15r]
-        current_map = [track_12b, track_23r, track_34b, track_45r, track_35r, track_35b, track_15r]
-        routes = [("1", "2", 3), ("1", "3", 5), ("1", "4", 10), ("3", "2", 1), ("4", "5", 3), ("3", "5", 2)]
+        track_46y = Track('track_46y', 4, 6, 1, 1, 'yellow')
+        track_36y = Track('track_36y', 3, 6, 2, 2, 'yellow')
+        track_27r = Track('track_27r', 2, 7, 4, 7, 'red')
+        track_67b = Track('track_67b', 6, 7, 3, 4, 'blue')
+        track_68y = Track('track_68y', 6, 8, 3, 4, 'yellow')
+        track_89r = Track('track_89r', 8, 9, 4, 7, 'red')
+        track_49b = Track('track_49b', 4, 9, 2, 2, 'blue')
+        track_49y = Track('track_49y', 4, 9, 2, 2, 'yellow')
+        track_910y = Track('track_910y', 9, 10, 3, 4, 'yellow')
+        track_510b = Track('track_510b', 5, 10, 2, 2, 'blue')
+        track_511b = Track('track_511b', 5, 11, 3, 4, 'blue')
+        track_111y = Track('track_111y', 1, 11, 5, 10, 'yellow')
+        track_1112r = Track('track_1112r', 11, 12, 3, 4, 'red')
+        track_112b = Track('track_112b', 1, 12, 2, 2, 'blue')
+        track_112y = Track('track_112y', 1, 12, 2, 2, 'yellow')
+        track_113b = Track('track_113b', 1, 13, 2, 2, 'blue')
+        track_213r = Track('track_213r', 2, 13, 3, 4, 'red')
 
-        playing_player = Player("Marek")
-        # playing_player.draw_route(routes[1])
-        playing_player.draw_route(random.choice(routes))
+        initialized_map = [track_12b, track_23r, track_34b, track_45r, track_35r, track_35b, track_15r, track_213r,
+                           track_113b, track_112y, track_112b, track_1112r, track_111y, track_511b, track_510b,
+                           track_910y, track_89r, track_68y, track_36y, track_46y, track_27r, track_67b, track_49b,
+                           track_49y]
+        current_map = initialized_map.copy()
+        game_map = initialized_map.copy()
+        small_routes = [("1", "11", 5), ("1", "2", 5), ("5", "6", 5), ("5", "9", 5),
+                        ("3", "10", 5), ("2", "7", 4), ("4", "8", 4), ("2", "9", 5)]
+        big_routes = [("9", "13", 11), ("1", "7", 13), ("6", "11", 10), ("8", "12", 14)]
+
+        playing_player = Player("Gracz")
+        playing_player.draw_route(random.choice(big_routes))
+        playing_player.draw_route(random.choice(small_routes))
         players = [playing_player]
 
         game_end = False
         iterations_counter = 0
-        #print(check_reward('track_34b', playing_player, initialized_map, current_map))
+
         while not game_end:
             current_player = players[0]
             # printing stuff
@@ -115,38 +175,18 @@ def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, ga
             epsilon = max(min_epsilon, 0.9 - episode * epsilon_dec)
             actions = agent.get_legal_actions(current_player, initialized_map, current_map)
 
-            # print(actions)
             if np.random.random() < epsilon:
                 action = np.random.choice(actions)
             else:
-                # choose action with highest Q-value
+                # Choose action with highest Q-value
                 actions = agent.get_legal_actions(current_player, initialized_map, current_map)
-                q_values = [np.dot(weights.T, agent.get_feature_vector(current_player, a)) for a in actions]
+                q_values = [np.dot(weights.T, agent.get_feature_vector(current_player)) for _ in actions]
                 action_index = np.argmax(q_values)
                 action = actions[action_index]
-            # print(action)
 
-            # decision = current_player.draw_or_build_decision()
             if action == "draw":
-                current_player.draw_cards(random.choice(['red', 'blue']))
+                current_player.draw_cards(random.choice(['red', 'blue', 'yellow']))
             else:
-                # print(f"{current_player.name}, type 0/1/2 .. according to track you want to build")
-                # print(f"{[track.name for track in current_map]}")
-                # decision = current_player.decision_getter([str(i) for i in range(len(current_map))])
-                # track_to_built = current_map[int(decision)]
-
-                # check if player has enough cards to built track
-                # cards_with_matching_color = 0
-                # for card in current_player.hand:
-                #     if card == track_to_built.track_type:
-                #         cards_with_matching_color += 1
-                # if cards_with_matching_color >= track_to_built.length:
-                #     current_map.pop(int(decision))
-                #     current_player.build_connection(track_to_built)
-                #     print(f"{current_player.name} built track {track_to_built.name}."
-                #           f" Current score: {current_player.score}, wagons left: {current_player.wagons}")
-                # else:
-                #     print("You don't have enough cards to build chosen track")
                 track_to_built = 0
                 for track in current_map:
                     if action == track.name:
@@ -166,13 +206,12 @@ def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, ga
             if gather_data:
                 gameplay_data.append([feature_vector, action])
             reward = check_reward(action, current_player, initialized_map, current_map)
-            # print(check_reward(action, current_player, initialized_map, current_map))
-            # print(current_player.completed_routes)
+
             q_value = np.dot(weights.T, feature_vector)
             if game_end:
                 target_q = reward
             else:
-                max_q = max([np.dot(weights.T, feature_vector) for a in actions])
+                max_q = max([np.dot(weights.T, feature_vector) for _ in actions])
                 target_q = reward + gamma * max_q
 
             error = target_q - q_value
@@ -207,7 +246,8 @@ def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, ga
                     data = (weights, episode)
                     pickle.dump(data, f)
             period_best_score = 0
-
+    if show_best:
+        visualize(game_map, best_connections)
     if save:
         with open("model", "wb") as f:
             data = (weights, episode)
@@ -215,11 +255,8 @@ def games(episodes, iterations, number_of_features, min_epsilon, epsilon_dec, ga
     if gather_data:
         with open("data", "wb") as f:
             pickle.dump(gameplay_data, f)
-    # print(players[0].score)
-    # players[0].score += check_routes(players[0])
-    # print(players[0].score)
+    return 0
 
 
-# episodes = 10
-
-game1 = games(episodes=100, iterations=100, number_of_features=4, min_epsilon=0.01, epsilon_dec=0.003, gamma=0.5, gather_data=True, learning_rate=0.001, save=True)
+game1 = games(episodes=11, iterations=100,  min_epsilon=0.01, epsilon_dec=0.01, gamma=0.5,
+              gather_data=True, learning_rate=0.01, save=True, show_best=True)
