@@ -1,0 +1,1 @@
+Application enables to play a simplified version of "Ticket to ride" game as 2 human players playing in "hot seat" mode, or to play against "computer" - model trained using approximate q-learning technique.
